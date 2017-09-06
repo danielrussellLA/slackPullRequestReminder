@@ -1,7 +1,7 @@
 // call this file by typing something like: `user=bob pr=https://github.com/myorg/myorgrepo/pull/12345 node remind.js`
 'use-strict'
 const Slack = require('slack-node');
-const apiToken = "<-- your slack API token -->";
+const apiToken = "<-- your slack API token -->"; // create token at https://api.slack.com/custom-integrations/legacy-tokens
 
 const slack = new Slack(apiToken);
 
