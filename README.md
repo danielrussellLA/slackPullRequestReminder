@@ -8,7 +8,9 @@ nodejs (latest version)
 slack app installed on your computer
 
 ## Running the App: 
-add the ID of the desired user to the users object. ID's can be found by searching for people in users.json
+- Get a slack API token from your company's slack
+- Add the ID of the desired user to the users object. NOTE: ID's can be found by searching for people in users.json after running remind.js once `node remind.js`
+- Then run the following command:
 ```
 user=bob pr=http://github.com/example-pr/12345 node remind.js 
 ```
