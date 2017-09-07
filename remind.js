@@ -57,7 +57,7 @@ slack.api("users.list", (err, response) => {
     }
 
     let users = response.members;
-    users.some( (user, i) => {
+    users.forEach( (user, i) => {
         USER.forEach((name, j) => {
             if (name.toLowerCase() === user.name.toLowerCase() ||
                 name.toLowerCase() === user.profile.real_name.toLowerCase()) {
