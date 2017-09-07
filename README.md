@@ -8,12 +8,16 @@ Reminds a slack user every hour to check out your PR
 - Slack app installed on your computer
 
 ## Running the App: 
+Step 1
+- run `npm i` to install dependencies
+Step 2
 - Get a slack API token from your group's slack here: https://api.slack.com/custom-integrations/legacy-tokens. You will need to be signed into slack to generate a token.
 - paste that token into `slack.config.js`:
 ```
 // slack.config.js
 module.exports = "<-- your API token here -->";
 ```
+Step 3
 - to run the app, execute the following in your terminal with your desired recipient's slack username and a link to your PR:
 ```
 user=bob pr=http://github.com/example-pr/12345 node remind.js 
