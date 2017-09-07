@@ -8,7 +8,7 @@
 'use-strict'
 const fs = require('fs');
 const Slack = require('slack-node');
-const apiToken = require('./slack.config.js'); // create token at https://api.slack.com/custom-integrations/legacy-tokens
+const apiToken = require('./slack.config.js');
 
 const slack = new Slack(apiToken); // init app
 
