@@ -1,16 +1,16 @@
 # Automatic PR Reminder
 
 ## Description
-Give a user's name and a github PR link and it will remind them every hour to check out your PR
+Reminds a slack user every hour to check out your PR
 
 ## Dependencies
 nodejs (latest version)
-slack app installed on your computer
+Slack app installed on your computer
 
 ## Running the App: 
-- Get a slack API token from your company's slack
-- Add the ID of the desired user to the users object. NOTE: ID's can be found by searching for people in users.json after running remind.js once `node remind.js`
-- Then run the following command:
+- Get a slack API token from your group's slack here: https://api.slack.com/custom-integrations/legacy-tokens. You will need to be signed into slack to generate a token.
+- paste that token into the config file:
+- to run the app, execute the following in your terminal with your desired recipient's slack username and a link to your PR:
 ```
 user=bob pr=http://github.com/example-pr/12345 node remind.js 
 ```
