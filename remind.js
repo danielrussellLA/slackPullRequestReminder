@@ -12,7 +12,7 @@ const apiToken = require('./slack.config.js');
 
 const slack = new Slack(apiToken); // init app
 
-let USER = process.env.user
+let USER = process.env.user.split(',')
 let PR = process.env.pr
 let FREQUENCY = 3600000 // 1 hour
 
@@ -37,6 +37,7 @@ const messages = [
 let remind = (userId) => {
     let randomIdx = Math.floor(Math.random() * messages.length)
     let message = messages[randomIdx]
+
     slack.api('chat.postMessage', {
         text: `${PR} ${message}`,
         channel: userId,
@@ -51,18 +52,25 @@ slack.api("users.list", (err, response) => {
         console.log('ERROR fetching slack users', err);
         return;
     }
+
     let users = response.members;
-    users.some( (member, i) => {
-        if (USER.toLowerCase() === member.name.toLowerCase() ||
-            USER.toLowerCase() === member.profile.real_name.toLowerCase()) {
-            remind(member.id) // initial reminder
-            setInterval(() => {
-                remind(member.id)
-            }, FREQUENCY) // repeat reminder
-            return true;
-        }
-        if (i === users.length - 1) {
-            console.log('ERROR: could not find user:', USER);
+    users.some( (user, i) => {
+        USER.forEach((name, j) => {
+            if (name.toLowerCase() === user.name.toLowerCase() ||
+                name.toLowerCase() === user.profile.real_name.toLowerCase()) {
+                
+                remind(user.id) // initial reminder
+                setInterval(() => {
+                    remind(user.id)
+                }, FREQUENCY) // repeat reminder
+                
+                USER.splice(j, 1);
+            }
+        })
+
+        if (i === users.length - 1 && USER.length) {
+            console.log('ERROR: invalid slack username(s):', USER.join(', '));
+            console.log('- messages not sent to:', USER.join(', '));
             console.log('- please enter a valid slack user');
         }
     });
