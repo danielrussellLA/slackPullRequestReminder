@@ -54,7 +54,7 @@ slack.api("users.list", (err, response) => {
     let users = response.members;
     users.some( (member, i) => {
         if (USER.toLowerCase() === member.name.toLowerCase() ||
-        USER.toLowerCase() === member.profile.real_name.toLowerCase()) {
+            USER.toLowerCase() === member.profile.real_name.toLowerCase()) {
             remind(member.id) // initial reminder
             setInterval(() => {
                 remind(member.id)
