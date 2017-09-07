@@ -18,6 +18,10 @@ module.exports = "<-- your API token here -->";
 ```
 user=bob pr=http://github.com/example-pr/12345 node remind.js 
 ```
+- to send to multiple users at once:
+```
+user=bob,sally,jamie pr=http://github.com/example-pr/12345 node remind.js 
+```
 
 ## Notes
 example of how to tag someone on slack: 
