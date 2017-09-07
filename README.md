@@ -9,7 +9,7 @@ Reminds a slack user every hour to check out your PR
 
 ## Running the App: 
 Step 1
-- run `npm i` to install dependencies
+- run `npm i` to install dependencies<br>
 Step 2
 - Get a slack API token from your group's slack here: https://api.slack.com/custom-integrations/legacy-tokens. You will need to be signed into slack to generate a token.
 - paste that token into `slack.config.js`:
