@@ -1,4 +1,4 @@
-# Automatic PR Reminder
+# Automatic PR Reminder for Slack
 
 ## Description
 Reminds a slack user every hour to check out your PR
