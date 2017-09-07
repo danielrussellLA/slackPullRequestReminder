@@ -58,7 +58,7 @@ slack.api("users.list", (err, response) => {
 
     let users = response.members;
     users.forEach( (user, i) => {
-        USER.forEach((name, j) => {
+        USER.some((name, j) => {
             if (name.toLowerCase() === user.name.toLowerCase() ||
                 name.toLowerCase() === user.profile.real_name.toLowerCase()) {
                 
@@ -68,6 +68,7 @@ slack.api("users.list", (err, response) => {
                 }, FREQUENCY) // repeat reminder
                 
                 USER.splice(j, 1);
+                return true;
             }
         })
 
