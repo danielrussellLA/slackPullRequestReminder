@@ -28,7 +28,9 @@ user=bob pr=http://github.com/example-pr/12345 node remind.js
 ```
 user=bob,sally,jamie pr=http://github.com/example-pr/12345 node remind.js 
 ```
-
+### Step 4
+- keep the app running in a terminal tab for as long as you want to keep reminding people. the app will remind people up to 5 times per time you run it
+- to stop reminding people, press `Ctrl + C` to quit the app.
 ## Notes
 example of how to tag someone on slack: 
 ```
