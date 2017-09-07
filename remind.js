@@ -12,15 +12,18 @@ const apiToken = require('./slack.config.js');
 
 const slack = new Slack(apiToken); // init app
 
-let USER = process.env.user.split(',')
-let PR = process.env.pr
+let USER = process.env.user || process.env.name || process.env.username || process.env.NAME || process.env.USERNAME;
+let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
 let FREQUENCY = 3600000 // 1 hour
+
 
 if (!USER || !PR) {
     console.log('ERROR: message not sent');
     console.log('REASON: "user" or "pr" environment variables not defined.');
     console.log('SOLUTION: Try running the command like: `user=bob pr=https://github.com/myorg/myorgrepo/pull/12345 node remind.js`')
     return;
+} else {
+    USER = USER.split(',')
 }
 
 const messages = [
