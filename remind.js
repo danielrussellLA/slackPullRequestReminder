@@ -73,6 +73,7 @@ if (!isValidPRNumber(PR)) {
 
 let checkGithubForUpdates = () => {
     let comments = 0;
+    let approved = false;
     
     github.getPullRequest(PR)
         .then((githubData) => {
@@ -82,6 +83,19 @@ let checkGithubForUpdates = () => {
                 comments: githubData.data.comments + githubData.data.review_comments,
                 approved: githubData.data.mergeable_state !== 'blocked'
             })
+            
+            if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
+                notifier.notify({
+                    title: `your PR is good to merge`,
+                    message: PR,
+                    sound: true,
+                    icon: path.join(__dirname, 'logos/approved.png'),
+                    wait: true
+                })
+                approved = true;
+                
+                logUpdate(githubData);
+            }
         })
         .catch((err) => {
             console.log(err);
@@ -95,7 +109,6 @@ let checkGithubForUpdates = () => {
         })
     }
     
-    let approved = false;
     let checkAgain = setInterval(() => {
         github.getPullRequest(PR)
             .then((githubData) => {
