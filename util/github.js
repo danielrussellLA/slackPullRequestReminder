@@ -1,7 +1,10 @@
 const GithubApi = require('github');
 const github = new GithubApi({ Promise: require('bluebird') });
-const githubCredentials = require('../config.js').github;
+const githubConfig = require('../config.js').github;
+const githubRepo = githubConfig.repo;
+const githubCredentials = githubConfig.credentials;
 github.authenticate(githubCredentials);
+
 
 const error = require('./error');
 
@@ -28,10 +31,6 @@ module.exports = {
         
         const number = pr_elements[pr_elements.length - 1];
 
-        return github.pullRequests.get({
-            number: pr_number,
-            owner: 'OpenMail',
-            repo: 'Openmail',
-        })
+        return github.pullRequests.get(Object.assign(githubRepo, { number: pr_number }))
     }
 }
