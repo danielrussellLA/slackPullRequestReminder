@@ -125,7 +125,7 @@ let checkGithubForUpdates = () => {
                 } else if (githubData.data.review_comments + githubData.data.comments < comments) {
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notifier.notify({
-                        title: `someone removed a from your PR`,
+                        title: `someone removed a comment from your PR`,
                         message: PR,
                         sound: true,
                         icon: path.join(__dirname, 'logos/github-logo.png')
