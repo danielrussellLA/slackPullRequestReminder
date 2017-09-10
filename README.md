@@ -8,15 +8,24 @@ Reminds a slack user every hour to check out your PR
 - Slack app installed on your computer
 
 ## Running the App: 
-### Step 1 
+### Step 1 Install Dependencies
 - run `npm i` to install dependencies
 
-### Step 2 
+### Step 2 Setup your github and slack in config.js
 - Get a slack API token from your group's slack here: https://api.slack.com/custom-integrations/legacy-tokens. You will need to be signed into slack to generate a token.
-- paste that token into `slack.config.js`:
+- paste that token into `config.js`:
 ```
-// slack.config.js
-module.exports = "<-- your API token here -->";
+// config.js
+module.exports = {
+    // enter github username and password
+    github: {
+        type: "basic",
+        username: GITHUB_USERNAME,
+        password: GITHUB_PASSWORD
+    },
+    // create token at https://api.slack.com/custom-integrations/legacy-tokens
+    slack: SLACK_API_TOKEN
+}
 ```
 
 ### Step 3 
