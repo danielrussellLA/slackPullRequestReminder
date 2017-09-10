@@ -14,7 +14,7 @@ Reminds a slack user every hour to check out your PR
 ### Step 2 Setup your github and slack in config.js
 - Get a slack API token from your group's slack here: https://api.slack.com/custom-integrations/legacy-tokens. You will need to be signed into slack to generate a token.
 - paste that token into `config.js`:
-- enter in your github all your github info too
+- enter in all your github info too
 ```
 // config.js
 module.exports = {
