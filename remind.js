@@ -10,21 +10,14 @@ let USER = process.env.user || process.env.name || process.env.username || proce
 let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
 let FORCE_REMIND = process.env.f || process.env.force || false;
 let REMINDER_FREQUENCY = 3600000; // 1 hour
-let GITHUB_FREQUENCCY = 30000;
+let GITHUB_FREQUENCCY = 20000;
 let NUM_REMINDERS_SENT = 0;
 
-
 const fs = require('fs');
-const path = require('path');
-const opn = require('opn');
 const error = require('./util/error');
 const github = require('./util/github');
 const slack = require('./util/slack');
-
-const notifier = require('node-notifier');
-notifier.on('click', (notifierObject, options) => {
-    opn(PR);
-})
+const notificationScheduler = require('./util/notificationScheduler');
 
 
 if (!USER || !PR) {
@@ -37,6 +30,8 @@ if (!USER || !PR) {
 } else {
     USER = USER.split(',')
 }
+
+notificationScheduler.init(PR);
 
 let github_url_regex = /(https:\/\/github.com)/;
 let pull_request_regex = /(\/pull)/
@@ -71,89 +66,6 @@ if (!isValidPRNumber(PR)) {
     return;
 }
 
-let checkGithubForUpdates = () => {
-    let comments = 0;
-    let approved = false;
-    
-    github.getPullRequest(PR)
-        .then((githubData) => {
-            comments = githubData.data.comments + githubData.data.review_comments;
-            console.log('PR status from github: \n', {
-                pr: PR,
-                comments: githubData.data.comments + githubData.data.review_comments,
-                approved: githubData.data.mergeable_state !== 'blocked'
-            })
-            
-            if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
-                notifier.notify({
-                    title: `your PR is good to merge`,
-                    message: PR,
-                    sound: true,
-                    icon: path.join(__dirname, 'logos/approved.png'),
-                    wait: true
-                })
-                approved = true;
-                
-                logUpdate(githubData);
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-    
-    let logUpdate = (githubData) => {
-        console.log('PR update from github: \n', {
-            pr: PR,
-            comments: githubData.data.comments + githubData.data.review_comments,
-            approved: githubData.data.mergeable_state !== 'blocked'
-        })
-    }
-    
-    let checkAgain = setInterval(() => {
-        github.getPullRequest(PR)
-            .then((githubData) => {
-                if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
-                    notifier.notify({
-                        title: `your PR is good to merge`,
-                        message: PR,
-                        sound: true,
-                        icon: path.join(__dirname, 'logos/approved.png'),
-                        wait: true
-                    })
-                    approved = true;
-                    
-                    logUpdate(githubData);
-                }
-                if (githubData.data.review_comments + githubData.data.comments > comments) {
-                    comments = githubData.data.comments + githubData.data.review_comments;
-                    notifier.notify({
-                        title: `someone commented on your PR`,
-                        message: PR,
-                        sound: true,
-                        icon: path.join(__dirname, 'logos/github-logo.png'),
-                        wait: true
-                    })
-                    
-                    logUpdate(githubData);
-                } else if (githubData.data.review_comments + githubData.data.comments < comments) {
-                    comments = githubData.data.comments + githubData.data.review_comments;
-                    notifier.notify({
-                        title: `someone removed a comment from your PR`,
-                        message: PR,
-                        sound: true,
-                        icon: path.join(__dirname, 'logos/github-logo.png')
-                    })
-                    logUpdate(githubData);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            })
-    }, GITHUB_FREQUENCCY)
-}
-
-checkGithubForUpdates();
-
 
 let remind = (user) => {
     slack.sendMessage({
@@ -174,23 +86,14 @@ let scheduleReminders = () => {
                 name.toLowerCase() === user.profile.real_name.toLowerCase()) {
                     
                     remind(user); // initial reminder
-                    notifier.notify({
-                        title: `Reminder sent to: ${name}`,
-                        message: PR,
-                        sound: true,
-                        icon: path.join(__dirname, 'logos/slack-logo.png')
-                    })
+                    notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
                     NUM_REMINDERS_SENT++;
                     
                     schedules[user.id] = setInterval(() => {
                         remind(user);
-                        notifier.notify({
-                            title: `Reminder sent to: ${name}`,
-                            message: PR,
-                            sound: true,
-                            icon: path.join(__dirname, 'logos/slack-logo.png')
-                        })
+                        notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
                         NUM_REMINDERS_SENT++;
+
                         if (NUM_REMINDERS_SENT == 5) {
                             clearInterval(schedules[user.id]); // stop reminders after 5
                             delete schedules[user.id];
@@ -214,3 +117,52 @@ let scheduleReminders = () => {
 }
 
 scheduleReminders();
+
+
+let checkGithubForUpdates = () => {
+    let comments = 0;
+    let approved = false;
+    
+    let logUpdate = (githubData) => {
+        console.log('current PR status from github: \n', {
+            pr: PR,
+            comments: githubData.data.comments + githubData.data.review_comments,
+            approved: githubData.data.mergeable_state !== 'blocked'
+        })
+        if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
+            notificationScheduler.send({ type: 'readyToMerge', pr: PR })
+            approved = true;
+        }
+    }
+    
+    github.getPullRequest(PR)
+        .then((githubData) => {
+            comments = githubData.data.comments + githubData.data.review_comments;
+            logUpdate(githubData);
+            
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+
+
+    setInterval(() => {
+        github.getPullRequest(PR)
+            .then((githubData) => {
+                logUpdate(githubData);
+                
+                if (githubData.data.review_comments + githubData.data.comments > comments) {
+                    comments = githubData.data.comments + githubData.data.review_comments;
+                    notificationScheduler.send({ type: 'commentAdded', pr: PR })
+                } else if (githubData.data.review_comments + githubData.data.comments < comments) {
+                    comments = githubData.data.comments + githubData.data.review_comments;
+                    notificationScheduler.send({ type: 'commentRemoved', pr: PR })
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+    }, GITHUB_FREQUENCCY)
+}
+
+checkGithubForUpdates();
