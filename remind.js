@@ -139,12 +139,10 @@ let checkGithubForUpdates = () => {
         .then((githubData) => {
             comments = githubData.data.comments + githubData.data.review_comments;
             logUpdate(githubData);
-            
         })
         .catch((err) => {
             console.log(err);
         })
-
 
     setInterval(() => {
         github.getPullRequest(PR)
