@@ -20,12 +20,12 @@ module.exports = {
         return new Promise((resolve, reject) => {
             slack.api("users.list", (err, response) => {
                 if (err) {
-                    reject(err);
                     error.log({
                         error: `fetching slack API data.`,
                         reason: `invalid slack API token`,
                         solution: `Try renewing your API token here: https://api.slack.com/custom-integrations/legacy-tokens and pasting the new token in ./slack.config.js`
                     });
+                    reject(err);
                 }
                 resolve(response);
             });
