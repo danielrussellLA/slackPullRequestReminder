@@ -28,7 +28,7 @@ module.exports = {
 }
 ```
 
-### Step 3 
+### Step 3 Run the app
 - to run the app, execute the following in your terminal with your desired recipient's slack username and a link to your PR:
 ```
 user=bob pr=http://github.com/example-pr/12345 node remind.js 
