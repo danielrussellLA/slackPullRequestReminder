@@ -14,10 +14,10 @@ let GITHUB_FREQUENCCY = 20000;
 let NUM_REMINDERS_SENT = 0;
 
 const fs = require('fs');
-const error = require('./util/error');
-const github = require('./util/github');
-const slack = require('./util/slack');
 const notificationScheduler = require('./util/notificationScheduler');
+const error = require('./util/error');
+const slack = require('./util/slack');
+const github = require('./util/github');
 
 
 if (!USER || !PR) {
@@ -83,7 +83,7 @@ let scheduleReminders = () => {
         users.forEach( (user, i) => {
             USER.some((name, j) => {
                 if (name.toLowerCase() === user.name.toLowerCase() ||
-                name.toLowerCase() === user.profile.real_name.toLowerCase()) {
+                    name.toLowerCase() === user.profile.real_name.toLowerCase()) {
                     
                     remind(user); // initial reminder
                     notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
