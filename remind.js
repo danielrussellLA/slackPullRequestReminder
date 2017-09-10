@@ -70,45 +70,49 @@ let checkGithubForUpdates = () => {
     let comments = 0;
     
     github.getPullRequest(PR)
-    .then((githubData) => {
-        reviewComments = githubData.data.review_comments;
-        comments = githubData.data.comments;
-        console.log('PR status from github: \n', {
-            pr: PR,
-            comments: githubData.data.comments + githubData.data.review_comments,
-            approved: githubData.data.mergeable_state !== 'blocked'
-        })
-    })
-    .catch((err) => {
-        console.log(err);
-    })
-    
-    let checkAgain = setInterval(() => {
-        github.getPullRequest(PR).then((githubData) => {
-            if (githubData.data.mergeable_state !== 'blocked') {
-                notifier.notify({
-                    title: `your PR has been approved!`,
-                    message: PR,
-                    sound: true,
-                    icon: path.join(__dirname, 'logos/github-logo.png')
-                })
-                clearInterval(checkAgain)
-            }
-            if (githubData.data.review_comments > reviewComments ||
-                githubData.data.comments > comments) {
-                notifier.notify({
-                    title: `someone commented on your PR`,
-                    message: PR,
-                    sound: true,
-                    icon: path.join(__dirname, 'logos/github-logo.png')
-                })
-            }
-            console.log('PR update from github:', {
+        .then((githubData) => {
+            reviewComments = githubData.data.review_comments;
+            comments = githubData.data.comments;
+            console.log('PR status from github: \n', {
                 pr: PR,
                 comments: githubData.data.comments + githubData.data.review_comments,
                 approved: githubData.data.mergeable_state !== 'blocked'
             })
         })
+        .catch((err) => {
+            console.log(err);
+        })
+    
+    let checkAgain = setInterval(() => {
+        github.getPullRequest(PR)
+            .then((githubData) => {
+                if (githubData.data.mergeable_state !== 'blocked') {
+                    notifier.notify({
+                        title: `your PR has been approved!`,
+                        message: PR,
+                        sound: true,
+                        icon: path.join(__dirname, 'logos/github-logo.png')
+                    })
+                    clearInterval(checkAgain)
+                }
+                if (githubData.data.review_comments > reviewComments ||
+                    githubData.data.comments > comments) {
+                    notifier.notify({
+                        title: `someone commented on your PR`,
+                        message: PR,
+                        sound: true,
+                        icon: path.join(__dirname, 'logos/github-logo.png')
+                    })
+                }
+                console.log('PR update from github:', {
+                    pr: PR,
+                    comments: githubData.data.comments + githubData.data.review_comments,
+                    approved: githubData.data.mergeable_state !== 'blocked'
+                })
+            })
+            .catch((err) => {
+                console.log(err);
+            })
     }, 60000)
 }
 
