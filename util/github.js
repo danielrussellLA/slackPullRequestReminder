@@ -1,6 +1,6 @@
 const GithubApi = require('github');
 const github = new GithubApi({ Promise: require('bluebird') });
-const githubCredentials = require('../config/github.config');
+const githubCredentials = require('../config.js').github;
 github.authenticate(githubCredentials);
 
 module.exports = {

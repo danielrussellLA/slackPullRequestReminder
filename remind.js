@@ -41,7 +41,8 @@ let checkGithubForUpdates = () => {
         comments = githubData.data.comments;
         console.log('github update:', {
             comments: githubData.data.comments + githubData.data.review_comments,
-            approved: githubData.data.mergeable_state !== 'blocked'
+            approved: githubData.data.mergeable_state !== 'blocked',
+            pr: PR
         })
     })
     
@@ -64,7 +65,8 @@ let checkGithubForUpdates = () => {
             }
             console.log('github update:', {
                 comments: githubData.data.comments + githubData.data.review_comments,
-                approved: githubData.data.mergeable_state !== 'blocked'
+                approved: githubData.data.mergeable_state !== 'blocked',
+                pr: PR
             })
         })
     }, 60000)

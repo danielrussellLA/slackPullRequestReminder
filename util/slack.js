@@ -1,5 +1,5 @@
 const Slack = require('slack-node');
-const apiToken = require('../config/slack.config');
+const apiToken = require('../config.js').slack;
 const slack = new Slack(apiToken); // init app
 const error = require('./error');
 const moment = require('moment');
