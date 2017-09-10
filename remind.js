@@ -16,7 +16,6 @@ const slack = require('./util/slack');
 
 let USER = process.env.user || process.env.name || process.env.username || process.env.NAME || process.env.USERNAME;
 let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
-let PR_NUM;
 let FORCE_REMIND = process.env.f || process.env.force || false;
 let FREQUENCY = 3600000; // 1 hour
 let NUM_REMINDERS_SENT = 0;
@@ -71,7 +70,6 @@ let checkGithubForUpdates = () => {
     
     github.getPullRequest(PR)
         .then((githubData) => {
-            console.log('APPROVED?', githubData)
             reviewComments = githubData.data.review_comments;
             comments = githubData.data.comments;
             console.log('PR status from github: \n', {
