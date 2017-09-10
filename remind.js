@@ -144,7 +144,6 @@ let scheduleReminders = () => {
                         sound: true,
                         icon: path.join(__dirname, 'logos/slack-logo.png')
                     })
-                    console.log(path.join(__dirname, 'logos/slack-logo.png'))
                     NUM_REMINDERS_SENT++;
                     
                     schedules[user.id] = setInterval(() => {
