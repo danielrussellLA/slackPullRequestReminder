@@ -104,7 +104,7 @@ let checkGithubForUpdates = () => {
                         icon: path.join(__dirname, 'logos/github-logo.png')
                     })
                 }
-                console.log('PR update from github:', {
+                console.log('PR update from github: \n', {
                     pr: PR,
                     comments: githubData.data.comments + githubData.data.review_comments,
                     approved: githubData.data.mergeable_state !== 'blocked'
