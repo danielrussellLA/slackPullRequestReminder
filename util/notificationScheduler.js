@@ -28,7 +28,7 @@ module.exports = {
                     title: `Reminder sent to: ${options.name}`,
                     message: options.pr,
                     sound: true,
-                    icon: path.join(__dirname, '../logos/slack-logo.png')
+                    icon: path.join(__dirname, '../icons/slack-logo.png')
                 })
             },
             commentAdded() {
@@ -36,7 +36,7 @@ module.exports = {
                     title: `someone commented on your PR`,
                     message: options.pr,
                     sound: true,
-                    icon: path.join(__dirname, '../logos/github-logo.png'),
+                    icon: path.join(__dirname, '../icons/github-logo.png'),
                     wait: true
                 })
             },
@@ -45,7 +45,7 @@ module.exports = {
                     title: `someone removed a comment from your PR`,
                     message: options.pr,
                     sound: true,
-                    icon: path.join(__dirname, '../logos/github-logo.png'),
+                    icon: path.join(__dirname, '../icons/github-logo.png'),
                     wait: true
                 })
             },
@@ -54,7 +54,7 @@ module.exports = {
                     title: `your PR is good to merge`,
                     message: options.pr,
                     sound: true,
-                    icon: path.join(__dirname, '../logos/approved.png'),
+                    icon: path.join(__dirname, '../icons/approved.png'),
                     wait: true
                 })
             }
