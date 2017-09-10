@@ -71,6 +71,7 @@ let checkGithubForUpdates = () => {
     
     github.getPullRequest(PR)
         .then((githubData) => {
+            console.log('APPROVED?', githubData)
             reviewComments = githubData.data.review_comments;
             comments = githubData.data.comments;
             console.log('PR status from github: \n', {
@@ -83,17 +84,19 @@ let checkGithubForUpdates = () => {
             console.log(err);
         })
     
+    let approved = false;
     let checkAgain = setInterval(() => {
         github.getPullRequest(PR)
             .then((githubData) => {
-                if (githubData.data.mergeable_state !== 'blocked') {
+                if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
                     notifier.notify({
-                        title: `your PR has been approved!`,
+                        title: `your PR is good to merge`,
                         message: PR,
                         sound: true,
-                        icon: path.join(__dirname, 'logos/github-logo.png')
+                        icon: path.join(__dirname, 'logos/approved.jpg')
                     })
-                    clearInterval(checkAgain)
+                    approved = true;
+                    // clearInterval(checkAgain)
                 }
                 if (githubData.data.review_comments > reviewComments ||
                     githubData.data.comments > comments) {
