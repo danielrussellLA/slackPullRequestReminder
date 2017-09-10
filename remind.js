@@ -17,8 +17,9 @@ const slack = require('./util/slack');
 let USER = process.env.user || process.env.name || process.env.username || process.env.NAME || process.env.USERNAME;
 let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
 let FORCE_REMIND = process.env.f || process.env.force || false;
-let FREQUENCY = 3600000; // 1 hour
+let REMINDER_FREQUENCY = 3600000; // 1 hour
 let NUM_REMINDERS_SENT = 0;
+let GITHUB_FREQUENCCY = 60000;
 
 if (!USER || !PR) {
     error.log({
@@ -91,10 +92,9 @@ let checkGithubForUpdates = () => {
                         title: `your PR is good to merge`,
                         message: PR,
                         sound: true,
-                        icon: path.join(__dirname, 'logos/approved.jpg')
+                        icon: path.join(__dirname, 'logos/approved.png')
                     })
                     approved = true;
-                    // clearInterval(checkAgain)
                 }
                 if (githubData.data.review_comments > reviewComments ||
                     githubData.data.comments > comments) {
@@ -114,7 +114,7 @@ let checkGithubForUpdates = () => {
             .catch((err) => {
                 console.log(err);
             })
-    }, 60000)
+    }, GITHUB_FREQUENCCY)
 }
 
 checkGithubForUpdates();
@@ -160,7 +160,7 @@ let scheduleReminders = () => {
                             clearInterval(schedules[user.id]); // stop reminders after 5
                             delete schedules[user.id];
                         }
-                    }, FREQUENCY) // repeat reminder
+                    }, REMINDER_FREQUENCY) // repeat reminder
                     
                     USER.splice(j, 1);
                     return true;
