@@ -9,6 +9,9 @@
   "author": "danielrussellla",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
+    "github": "^11.0.0",
+    "node-notifier": "^5.1.2",
     "slack-node": "^0.1.8"
   }
 }
