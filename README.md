@@ -19,9 +19,15 @@ Reminds a slack user every hour to check out your PR
 module.exports = {
     // enter github username and password
     github: {
-        type: "basic",
-        username: GITHUB_USERNAME,
-        password: GITHUB_PASSWORD
+        credentials: {
+            type: "basic",
+            username: GITHUB_USERNAME,
+            password: GITHUB_PASSWORD
+        },
+        repo: {
+            owner: OWNER,
+            repo: REPO
+        }
     },
     // create token at https://api.slack.com/custom-integrations/legacy-tokens
     slack: SLACK_API_TOKEN
