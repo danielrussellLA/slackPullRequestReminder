@@ -6,20 +6,26 @@
 
 // call this file by typing something like: `user=bob pr=https://github.com/myorg/myorgrepo/pull/12345 node remind.js`
 'use-strict'
-const fs = require('fs');
-const path = require('path');
-const notifier = require('node-notifier');
-const error = require('./util/error');
-const github = require('./util/github');
-const slack = require('./util/slack');
-
-
 let USER = process.env.user || process.env.name || process.env.username || process.env.NAME || process.env.USERNAME;
 let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
 let FORCE_REMIND = process.env.f || process.env.force || false;
 let REMINDER_FREQUENCY = 3600000; // 1 hour
+let GITHUB_FREQUENCCY = 30000;
 let NUM_REMINDERS_SENT = 0;
-let GITHUB_FREQUENCCY = 60000;
+
+
+const fs = require('fs');
+const path = require('path');
+const opn = require('opn');
+const error = require('./util/error');
+const github = require('./util/github');
+const slack = require('./util/slack');
+
+const notifier = require('node-notifier');
+notifier.on('click', (notifierObject, options) => {
+    opn(PR);
+})
+
 
 if (!USER || !PR) {
     error.log({
@@ -66,13 +72,11 @@ if (!isValidPRNumber(PR)) {
 }
 
 let checkGithubForUpdates = () => {
-    let reviewComments = 0;
     let comments = 0;
     
     github.getPullRequest(PR)
         .then((githubData) => {
-            reviewComments = githubData.data.review_comments;
-            comments = githubData.data.comments;
+            comments = githubData.data.comments + githubData.data.review_comments;
             console.log('PR status from github: \n', {
                 pr: PR,
                 comments: githubData.data.comments + githubData.data.review_comments,
@@ -83,6 +87,14 @@ let checkGithubForUpdates = () => {
             console.log(err);
         })
     
+    let logUpdate = (githubData) => {
+        console.log('PR update from github: \n', {
+            pr: PR,
+            comments: githubData.data.comments + githubData.data.review_comments,
+            approved: githubData.data.mergeable_state !== 'blocked'
+        })
+    }
+    
     let approved = false;
     let checkAgain = setInterval(() => {
         github.getPullRequest(PR)
@@ -92,24 +104,34 @@ let checkGithubForUpdates = () => {
                         title: `your PR is good to merge`,
                         message: PR,
                         sound: true,
-                        icon: path.join(__dirname, 'logos/approved.png')
+                        icon: path.join(__dirname, 'logos/approved.png'),
+                        wait: true
                     })
                     approved = true;
+                    
+                    logUpdate(githubData);
                 }
-                if (githubData.data.review_comments > reviewComments ||
-                    githubData.data.comments > comments) {
+                if (githubData.data.review_comments + githubData.data.comments > comments) {
+                    comments = githubData.data.comments + githubData.data.review_comments;
                     notifier.notify({
                         title: `someone commented on your PR`,
                         message: PR,
                         sound: true,
+                        icon: path.join(__dirname, 'logos/github-logo.png'),
+                        wait: true
+                    })
+                    
+                    logUpdate(githubData);
+                } else if (githubData.data.review_comments + githubData.data.comments < comments) {
+                    comments = githubData.data.comments + githubData.data.review_comments;
+                    notifier.notify({
+                        title: `someone removed a from your PR`,
+                        message: PR,
+                        sound: true,
                         icon: path.join(__dirname, 'logos/github-logo.png')
                     })
+                    logUpdate(githubData);
                 }
-                console.log('PR update from github: \n', {
-                    pr: PR,
-                    comments: githubData.data.comments + githubData.data.review_comments,
-                    approved: githubData.data.mergeable_state !== 'blocked'
-                })
             })
             .catch((err) => {
                 console.log(err);
