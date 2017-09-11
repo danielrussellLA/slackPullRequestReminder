@@ -1,8 +1,6 @@
 const path = require('path');
 const opn = require('opn');
-
 const notifier = require('node-notifier');
-
 
 module.exports = {
     notificationQueue: [],
