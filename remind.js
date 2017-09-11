@@ -147,12 +147,12 @@ let checkGithubForUpdates = () => {
     setInterval(() => {
         github.getPullRequest(PR)
             .then((githubData) => {
-                logUpdate(githubData);
-                
                 if (githubData.data.review_comments + githubData.data.comments > comments) {
+                    logUpdate(githubData);
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notificationScheduler.send({ type: 'commentAdded', pr: PR })
                 } else if (githubData.data.review_comments + githubData.data.comments < comments) {
+                    logUpdate(githubData);
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notificationScheduler.send({ type: 'commentRemoved', pr: PR })
                 }
