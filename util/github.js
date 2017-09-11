@@ -5,7 +5,6 @@ const githubRepo = githubConfig.repo;
 const githubCredentials = githubConfig.credentials;
 github.authenticate(githubCredentials);
 
-
 const error = require('./error');
 
 module.exports = {
