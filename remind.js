@@ -6,84 +6,161 @@
 
 // call this file by typing something like: `user=bob pr=https://github.com/myorg/myorgrepo/pull/12345 node remind.js`
 'use-strict'
-const fs = require('fs');
-const Slack = require('slack-node');
-const apiToken = require('./slack.config.js');
-
-const slack = new Slack(apiToken); // init app
-
 let USER = process.env.user || process.env.name || process.env.username || process.env.NAME || process.env.USERNAME;
 let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
-let FREQUENCY = 3600000; // 1 hour
+let FORCE_REMIND = process.env.f || process.env.force || false;
+let REMINDER_FREQUENCY = 3600000; // 1 hour
+let GITHUB_FREQUENCCY = 20000;
 let NUM_REMINDERS_SENT = 0;
 
+const fs = require('fs');
+const notificationScheduler = require('./util/notificationScheduler');
+const error = require('./util/error');
+const slack = require('./util/slack');
+const github = require('./util/github');
+
+
 if (!USER || !PR) {
-    console.log('ERROR: message not sent');
-    console.log('REASON: "user" or "pr" environment variables not defined.');
-    console.log('SOLUTION: Try running the command like: `user=bob pr=https://github.com/myorg/myorgrepo/pull/12345 node remind.js`');
+    error.log({
+        error: `missing environment variables`,
+        reason: `"user" or "pr" environment variables not defined.`,
+        solution: `Try running the command like: user=bob pr=https://github.com/myorg/myorgrepo/pull/12345 node remind.js`
+    })
     return;
 } else {
     USER = USER.split(',')
 }
 
-const messages = [
-    'when you get a chance - thanks', 
-    'thanks', 
-    'whenever you get the time',
-    'needs a review',
-    'review please',
-    'PR for ya',
-    'much appreciated',
-    'feedback welcome'
-]
+notificationScheduler.init(PR);
 
-let remind = (userId) => {
-    let randomIdx = Math.floor(Math.random() * messages.length);
-    let message = messages[randomIdx];
+let github_url_regex = /(https:\/\/github.com)/;
+let pull_request_regex = /(\/pull)/
+if(!PR.match(github_url_regex) || !PR.match(pull_request_regex)) {
+    error.log({
+        error: `invalid github pull request url provided`,
+        reason: `your pr url does not include https://github.com or the /pull route`,
+        solution: `Try running the command like: user=bob pr=https://github.com/organization/repo/pull/12345 node remind.js`
+    })
+    return;
+}
 
-    slack.api('chat.postMessage', {
-        text: `${PR} ${message}`,
-        channel: userId,
-        as_user: true
-    }, (err, response) => {
-        console.log(response);
+let isValidPRNumber = (url) => {
+    let sections = url.split('/');
+    let isValid = false;
+    sections.forEach((section) => {
+        if (parseInt(section) !== NaN) {
+            if(section.length === 5) {
+                isValid = true;
+            }
+        }
+    });
+    return isValid;
+}
+
+if (!isValidPRNumber(PR)) {
+    error.log({
+        error: 'ERROR: invalid PR url',
+        reason: 'your pr url does not have a valid pr number',
+        solution: 'please enter a PR with a valid number. ex: https://github.com/organization/repo/12345'
+    });
+    return;
+}
+
+
+let remind = (user) => {
+    slack.sendMessage({
+        name: user.name,
+        to: user.id,
+        pr: PR
     });
 }
 
-let schedules = {};
-slack.api("users.list", (err, response) => {
-    if (err) {
-        console.log('ERROR fetching slack users', err);
-        return;
-    }
+let scheduleReminders = () => {
+    let schedules = {};
 
-    let users = response.members;
-    users.forEach( (user, i) => {
-        USER.some((name, j) => {
-            if (name.toLowerCase() === user.name.toLowerCase() ||
-                name.toLowerCase() === user.profile.real_name.toLowerCase()) {
-                
-                remind(user.id); // initial reminder
-                NUM_REMINDERS_SENT++;
-                
-                schedules[user.id] = setInterval(() => {
-                    remind(user.id);
+    slack.getUserList().then((response) => {
+        let users = response.members;
+        users.forEach( (user, i) => {
+            USER.some((name, j) => {
+                if (name.toLowerCase() === user.name.toLowerCase() ||
+                    name.toLowerCase() === user.profile.real_name.toLowerCase()) {
+                    
+                    remind(user); // initial reminder
+                    notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
                     NUM_REMINDERS_SENT++;
-                    if (NUM_REMINDERS_SENT == 5) {
-                        clearInterval(schedules[user.id]); // stop reminders after 5
-                        delete schedules[user.id];
-                    }
-                }, FREQUENCY) // repeat reminder
-                
-                USER.splice(j, 1);
-                return true;
+                    
+                    schedules[user.id] = setInterval(() => {
+                        remind(user);
+                        notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
+                        NUM_REMINDERS_SENT++;
+
+                        if (NUM_REMINDERS_SENT == 5) {
+                            clearInterval(schedules[user.id]); // stop reminders after 5
+                            delete schedules[user.id];
+                        }
+                    }, REMINDER_FREQUENCY) // repeat reminder
+                    
+                    USER.splice(j, 1);
+                    return true;
+                }
+            })
+            
+            if (i === users.length - 1 && USER.length) {
+                error.log({
+                    error: `Invalid slack username(s)`,
+                    reason: `Messages not sent to ${USER.join(', ')}`,
+                    solution: 'Please enter a valid slack user'
+                });
             }
+        });
+    })    
+}
+
+scheduleReminders();
+
+
+let checkGithubForUpdates = () => {
+    let comments = 0;
+    let approved = false;
+    
+    let logUpdate = (githubData) => {
+        console.log('current PR status from github: \n', {
+            pr: PR,
+            comments: githubData.data.comments + githubData.data.review_comments,
+            approved: githubData.data.mergeable_state !== 'blocked'
+        })
+        if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
+            notificationScheduler.send({ type: 'readyToMerge', pr: PR })
+            approved = true;
+        }
+    }
+    
+    github.getPullRequest(PR)
+        .then((githubData) => {
+            comments = githubData.data.comments + githubData.data.review_comments;
+            logUpdate(githubData);
+        })
+        .catch((err) => {
+            console.log(err);
         })
 
-        if (i === users.length - 1 && USER.length) {
-            console.log('ERROR: invalid slack username(s):', USER.join(', '));
-            console.log('- messages not sent to:', USER.join(', '));
-            console.log('- please enter a valid slack user');
-        }
-    });
-});
+    setInterval(() => {
+        github.getPullRequest(PR)
+            .then((githubData) => {
+                logUpdate(githubData);
+                
+                if (githubData.data.review_comments + githubData.data.comments > comments) {
+                    comments = githubData.data.comments + githubData.data.review_comments;
+                    notificationScheduler.send({ type: 'commentAdded', pr: PR })
+                } else if (githubData.data.review_comments + githubData.data.comments < comments) {
+                    comments = githubData.data.comments + githubData.data.review_comments;
+                    notificationScheduler.send({ type: 'commentRemoved', pr: PR })
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+    }, GITHUB_FREQUENCCY)
+}
+
+checkGithubForUpdates();
