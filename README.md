@@ -1,8 +1,8 @@
 # Slack Pull Request Reminder
-<img src="./icons/terminal.png" height='100px' />
-<img src="./icons/slack-logo.png" height='100px' />
-<img src="./icons/github-logo.png" height='100px' />
-<img src="./icons/approved.png" height='100px' />
+<span><img src="./icons/terminal.png" height='100px' /></span>
+<span><img src="./icons/slack-logo.png" height='100px' /></span>
+<span><img src="./icons/github-logo.png" height='100px' /></span>
+<span><img src="./icons/approved.png" height='100px' /></span>
 
 ## Description
 An automatic reminder scheduler for Slack. Sends reminder Slack messages under your user name every hour to remind teammates to check out your github pull request.
