@@ -58,3 +58,7 @@ example of how to tag someone on slack:
 'Hey <@U024BE7LH|bob>, did you see my PR?'
 ```
 - remember to use the @ + userID + | + human readable name
+
+## Bonus
+If you're tired of updating your branch to sync with master as your teammates merge their pull requests, add this snippet to your browser's bookmarlet tab and run it on your PR's page until your PR merges.
+`javascript:window.setInterval(function(){ console.log('attempting to merge...'); Array.from(document.getElementsByTagName("button")).filter(function(btn){ return btn.innerText in {'Update branch':1, 'Merge pull request':2, 'Confirm merge':3, 'Try again': 4, 'Delete branch': 5} && !btn.disabled}).map(function(btn){btn.click()}) }, 3000)`
