@@ -1,11 +1,15 @@
-# Automatic PR Reminder for Slack
+# Slack Pull Request Reminder
+<img src="./icons/terminal.png" height='100px' />
+<img src="./icons/slack-logo.png" height='100px' />
+<img src="./icons/github-logo.png" height='100px' />
+<img src="./icons/approved.png" height='100px' />
 
 ## Description
-Reminds a slack user every hour to check out your PR
+An automatic reminder scheduler for Slack. Sends reminder Slack messages under your user name every hour to remind teammates to check out your github pull request.
 
 ## Dependencies
-- nodejs (latest version)
-- Slack app installed on your computer
+- nodejs (v6.11.3LTS or higher) <a href='https://nodejs.org'>https://nodejs.org</a>
+- Slack <a href='https://slack.com/downloads'>https://slack.com/downloads</a>
 
 ## Running the App: 
 ### Step 1 Install Dependencies
