@@ -6,7 +6,7 @@
 # Slack Pull Request Reminder
 
 ## Description
-An automatic reminder scheduler for Slack. Sends Slack messages every hour under your user name to remind teammates to check out your github pull request. 
+A command line tool for scheduling automatic reminders on Slack. Sends Slack messages every hour under your user name to remind teammates to check out your github pull request. 
 
 Sends push notifications to you when teammates comment on or approve your PR.
 
