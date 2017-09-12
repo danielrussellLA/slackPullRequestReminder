@@ -1,11 +1,18 @@
-# Automatic PR Reminder for Slack
+<span><img src="./icons/terminal.png" height='100px' /></span>
+<span><img src="./icons/slack-logo.png" height='100px' /></span>
+<span><img src="./icons/github-logo.png" height='100px' /></span>
+<span><img src="./icons/approved.png" height='100px' /></span>
+
+# Slack Pull Request Reminder
 
 ## Description
-Reminds a slack user every hour to check out your PR
+A command line tool for scheduling automatic reminders on Slack. Sends Slack messages every hour under your user name to remind teammates to check out your github pull request. 
+
+Sends push notifications to you when teammates comment on or approve your PR.
 
 ## Dependencies
-- nodejs (latest version)
-- Slack app installed on your computer
+- nodejs (6.11.3LTS or higher) <a href='https://nodejs.org'>https://nodejs.org</a>
+- Slack <a href='https://slack.com/downloads'>https://slack.com/downloads</a>
 
 ## Running the App: 
 ### Step 1 Install Dependencies
@@ -53,3 +60,7 @@ example of how to tag someone on slack:
 'Hey <@U024BE7LH|bob>, did you see my PR?'
 ```
 - remember to use the @ + userID + | + human readable name
+
+## Bonus
+If you're tired of updating your branch to sync with master as your teammates merge their pull requests, add this snippet to your browser's bookmarlet tab and run it on your PR's page until your PR merges.
+`javascript:window.setInterval(function(){ console.log('attempting to merge...'); Array.from(document.getElementsByTagName("button")).filter(function(btn){ return btn.innerText in {'Update branch':1, 'Merge pull request':2, 'Confirm merge':3, 'Try again': 4, 'Delete branch': 5} && !btn.disabled}).map(function(btn){btn.click()}) }, 3000)`
