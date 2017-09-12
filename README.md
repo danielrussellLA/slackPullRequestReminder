@@ -1,11 +1,12 @@
-# Slack Pull Request Reminder
 <span><img src="./icons/terminal.png" height='100px' /></span>
 <span><img src="./icons/slack-logo.png" height='100px' /></span>
 <span><img src="./icons/github-logo.png" height='100px' /></span>
 <span><img src="./icons/approved.png" height='100px' /></span>
 
+# Slack Pull Request Reminder
+
 ## Description
-An automatic reminder scheduler for Slack. Sends reminder Slack messages under your user name every hour to remind teammates to check out your github pull request.
+An automatic reminder scheduler for Slack. Sends Slack messages every hour under your user name to remind teammates to check out your github pull request.
 
 ## Dependencies
 - nodejs (6.11.3LTS or higher) <a href='https://nodejs.org'>https://nodejs.org</a>
