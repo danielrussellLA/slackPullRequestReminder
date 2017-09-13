@@ -10,8 +10,7 @@ let USER = process.env.user || process.env.name || process.env.username || proce
 let PR = process.env.pr || process.env.PR || process.env.link || process.env.LINK;
 let FORCE_REMIND = process.env.f || process.env.force || false;
 let REMINDER_FREQUENCY = 3600000; // 1 hour
-let GITHUB_FREQUENCCY = 20000;
-let NUM_REMINDERS_SENT = 0;
+let GITHUB_FREQUENCY = 20000;
 
 const fs = require('fs');
 const notificationScheduler = require('./util/notificationScheduler');
@@ -32,8 +31,6 @@ if (!USER || !PR) {
     USER = USER.split(',')
 }
 
-notificationScheduler.init(PR);
-
 let github_url_regex = /(https:\/\/github.com)/;
 let pull_request_regex = /(\/pull)/
 if(!PR.match(github_url_regex) || !PR.match(pull_request_regex)) {
@@ -45,17 +42,19 @@ if(!PR.match(github_url_regex) || !PR.match(pull_request_regex)) {
     return;
 }
 
-let remind = (user) => {
-    slack.sendMessage({
-        name: user.name,
-        to: user.id,
-        pr: PR
-    });
-}
 
 let scheduleReminders = () => {
     let schedules = {};
+    let remindersSent = 0;
 
+    let remind = (user) => {
+        slack.sendMessage({
+            name: user.name,
+            to: user.id,
+            pr: PR
+        });
+    }
+    
     slack.getUserList().then((response) => {
         let users = response.members;
         users.forEach( (user, i) => {
@@ -65,14 +64,14 @@ let scheduleReminders = () => {
                     
                     remind(user); // initial reminder
                     notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
-                    NUM_REMINDERS_SENT++;
+                    remindersSent++;
                     
                     schedules[user.id] = setInterval(() => {
                         remind(user);
                         notificationScheduler.send({ name, type: 'reminderSent', pr: PR })
-                        NUM_REMINDERS_SENT++;
+                        remindersSent++;
 
-                        if (NUM_REMINDERS_SENT == 5) {
+                        if (remindersSent == 5) {
                             clearInterval(schedules[user.id]); // stop reminders after 5
                             delete schedules[user.id];
                         }
@@ -100,30 +99,14 @@ let checkGithubForUpdates = () => {
     let comments = 0;
     let approved = false;
 
-    let logGithubUpdate = (githubData) => {
-        console.log(`${moment().format('LT')} Github - current PR status:`)
-        console.log(`    pullrequest: ${PR}`)
-        console.log(`    comments: ${githubData.data.comments + githubData.data.review_comments}`)
-        console.log(`    approved: ${githubData.data.mergeable_state !== 'blocked'}`);
-        
-        // if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
-        //     notificationScheduler.send({ type: 'readyToMerge', pr: PR })
-        //     approved = true;
-        // }
-    }
-
     github.getPullRequest(PR)
         .then((githubData) => {
             comments = githubData.data.comments + githubData.data.review_comments;
-            logGithubUpdate(githubData);
+            github.logUpdate(githubData);
             scheduleReminders();
         })
         .catch((err) => {
-            error.log({
-                error: `ERROR: invalid PR url. ${err}`,
-                reason: 'your pr url is either not formatted properly or does not have a valid pr number',
-                solution: 'please enter a PR that looks something like: https://github.com/organization/repo/pull/12345'
-            });
+            console.log(err)
         })
 
     setInterval(() => {
@@ -132,17 +115,18 @@ let checkGithubForUpdates = () => {
                 if (githubData.data.review_comments + githubData.data.comments > comments) {
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notificationScheduler.send({ type: 'commentAdded', pr: PR })
-                    logGithubUpdate(githubData);
+                    github.logUpdate(githubData);
                 } else if (githubData.data.review_comments + githubData.data.comments < comments) {
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notificationScheduler.send({ type: 'commentRemoved', pr: PR })
-                    logGithubUpdate(githubData);
+                    github.logUpdate(githubData);
                 }
             })
             .catch((err) => {
                 console.log(err);
             })
-    }, GITHUB_FREQUENCCY)
+    }, GITHUB_FREQUENCY)
 }
 
+notificationScheduler.init(PR);
 checkGithubForUpdates();

@@ -20,6 +20,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             slack.api("users.list", (err, response) => {
                 if (err) {
+                    console.log(err);
                     error.log({
                         error: `fetching slack API data.`,
                         reason: `invalid slack API token`,
@@ -42,6 +43,7 @@ module.exports = {
             as_user: true
         }, (err, response) => {
             if (err) {
+                console.log(err);
                 error.log({
                     error: `sending message on slack`,
                     reason: err,
