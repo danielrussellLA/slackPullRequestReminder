@@ -12,6 +12,7 @@ let FORCE_REMIND = process.env.f || process.env.force || false;
 let REMINDER_FREQUENCY = 3600000; // 1 hour
 let GITHUB_FREQUENCY = 20000;
 
+
 const fs = require('fs');
 const notificationScheduler = require('./util/notificationScheduler');
 const error = require('./util/error');
@@ -94,7 +95,6 @@ let scheduleReminders = () => {
 }
 
 
-
 let checkGithubForUpdates = () => {
     let comments = 0;
     let approved = false;
@@ -127,6 +127,7 @@ let checkGithubForUpdates = () => {
             })
     }, GITHUB_FREQUENCY)
 }
+
 
 notificationScheduler.init(PR);
 checkGithubForUpdates();
