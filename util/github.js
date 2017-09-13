@@ -6,7 +6,6 @@ const githubCredentials = githubConfig.credentials;
 github.authenticate(githubCredentials);
 
 const moment = require('moment');
-const error = require('./error');
 
 module.exports = {
     getPullRequest(url) {
