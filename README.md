@@ -6,9 +6,9 @@
 # Slack Pull Request Reminder
 
 ## Description
-A command line tool for scheduling automatic reminders on Slack. Sends Slack messages every hour under your user name to remind teammates to check out your github pull request. 
-
-Sends push notifications to you when teammates comment on or approve your PR.
+A command line tool for scheduling automatic reminders on Slack. 
+- Sends Slack messages every hour under your user name to remind teammates to check out your github pull request. 
+- Sends push notifications to you when teammates comment on or approve your PR.
 
 ## Dependencies
 - nodejs (6.11.3LTS or higher) <a href='https://nodejs.org'>https://nodejs.org</a>
