@@ -22,7 +22,7 @@ module.exports = {
         let notifications = {
             reminderSent() {
                 notifier.notify({
-                    title: `Reminder sent to: ${options.name}`,
+                    title: `Slack - reminder sent to: ${options.name}`,
                     message: options.pr,
                     sound: true,
                     icon: path.join(__dirname, '../icons/slack-logo.png')
@@ -30,7 +30,7 @@ module.exports = {
             },
             commentAdded() {
                 notifier.notify({
-                    title: `someone commented on your PR`,
+                    title: `Github - someone commented on your PR`,
                     message: options.pr,
                     sound: true,
                     icon: path.join(__dirname, '../icons/github-logo.png'),
@@ -39,7 +39,7 @@ module.exports = {
             },
             commentRemoved() {
                 notifier.notify({
-                    title: `someone removed a comment from your PR`,
+                    title: `Github - someone removed a comment from your PR`,
                     message: options.pr,
                     sound: true,
                     icon: path.join(__dirname, '../icons/github-logo.png'),
@@ -48,7 +48,7 @@ module.exports = {
             },
             readyToMerge() {
                 notifier.notify({
-                    title: `your PR is good to merge`,
+                    title: `Github - your PR is good to merge`,
                     message: options.pr,
                     sound: true,
                     icon: path.join(__dirname, '../icons/approved.png'),

@@ -48,7 +48,7 @@ module.exports = {
                     solution: `Either something went wrong with the API or you entered a wrong user name. Try renewing your API token here: https://api.slack.com/custom-integrations/legacy-tokens and pasting the new token in ./slack.config.js OR entering in a valid slack user name. Otherwise investiage further.`
                 })
             }
-            console.log(`Reminder sent to ${params.name} at ${moment().format('LT')}`);
+            console.log(`${moment().format('LT')} Slack - reminder sent to ${params.name}`);
         });
     }
 }

@@ -18,6 +18,7 @@ const notificationScheduler = require('./util/notificationScheduler');
 const error = require('./util/error');
 const slack = require('./util/slack');
 const github = require('./util/github');
+const moment = require('moment');
 
 
 if (!USER || !PR) {
@@ -43,29 +44,6 @@ if(!PR.match(github_url_regex) || !PR.match(pull_request_regex)) {
     })
     return;
 }
-
-let isValidPRNumber = (url) => {
-    let sections = url.split('/');
-    let isValid = false;
-    sections.forEach((section) => {
-        if (parseInt(section) !== NaN) {
-            if(section.length === 5) {
-                isValid = true;
-            }
-        }
-    });
-    return isValid;
-}
-
-if (!isValidPRNumber(PR)) {
-    error.log({
-        error: 'ERROR: invalid PR url',
-        reason: 'your pr url does not have a valid pr number',
-        solution: 'please enter a PR with a valid number. ex: https://github.com/organization/repo/12345'
-    });
-    return;
-}
-
 
 let remind = (user) => {
     slack.sendMessage({
@@ -116,32 +94,36 @@ let scheduleReminders = () => {
     })    
 }
 
-scheduleReminders();
 
 
 let checkGithubForUpdates = () => {
     let comments = 0;
     let approved = false;
-    
-    let logUpdate = (githubData) => {
-        console.log('current PR status from github: \n', {
-            pr: PR,
-            comments: githubData.data.comments + githubData.data.review_comments,
-            approved: githubData.data.mergeable_state !== 'blocked'
-        })
-        if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
-            notificationScheduler.send({ type: 'readyToMerge', pr: PR })
-            approved = true;
-        }
+
+    let logGithubUpdate = (githubData) => {
+        console.log(`${moment().format('LT')} Github - current PR status:`)
+        console.log(`    pullrequest: ${PR}`)
+        console.log(`    comments: ${githubData.data.comments + githubData.data.review_comments}`)
+        console.log(`    approved: ${githubData.data.mergeable_state !== 'blocked'}`);
+        
+        // if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
+        //     notificationScheduler.send({ type: 'readyToMerge', pr: PR })
+        //     approved = true;
+        // }
     }
-    
+
     github.getPullRequest(PR)
         .then((githubData) => {
             comments = githubData.data.comments + githubData.data.review_comments;
-            logUpdate(githubData);
+            logGithubUpdate(githubData);
+            scheduleReminders();
         })
         .catch((err) => {
-            console.log(err);
+            error.log({
+                error: `ERROR: invalid PR url. ${err}`,
+                reason: 'your pr url is either not formatted properly or does not have a valid pr number',
+                solution: 'please enter a PR that looks something like: https://github.com/organization/repo/pull/12345'
+            });
         })
 
     setInterval(() => {
@@ -150,11 +132,11 @@ let checkGithubForUpdates = () => {
                 if (githubData.data.review_comments + githubData.data.comments > comments) {
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notificationScheduler.send({ type: 'commentAdded', pr: PR })
-                    logUpdate(githubData);
+                    logGithubUpdate(githubData);
                 } else if (githubData.data.review_comments + githubData.data.comments < comments) {
                     comments = githubData.data.comments + githubData.data.review_comments;
                     notificationScheduler.send({ type: 'commentRemoved', pr: PR })
-                    logUpdate(githubData);
+                    logGithubUpdate(githubData);
                 }
             })
             .catch((err) => {
