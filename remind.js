@@ -97,7 +97,6 @@ let scheduleReminders = () => {
 
 let checkGithubForUpdates = () => {
     let comments = 0;
-    let approved = false;
 
     github.getPullRequest(PR)
         .then((githubData) => {

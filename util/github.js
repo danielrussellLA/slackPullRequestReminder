@@ -19,9 +19,8 @@ module.exports = {
             console.log(`    comments: ${githubData.data.comments + githubData.data.review_comments}`)
             console.log(`    approved: ${githubData.data.mergeable_state !== 'blocked'}`);
             
-            // if (githubData.data.mergeable_state !== 'blocked' && approved == false) {
-            //     notificationScheduler.send({ type: 'readyToMerge', pr: PR })
-            //     approved = true;
-            // }
+            if (githubData.data.mergeable_state.toLowerCase() === 'mergeable') {
+                notificationScheduler.send({ type: 'readyToMerge', pr: PR })
+            }
     }
 }
